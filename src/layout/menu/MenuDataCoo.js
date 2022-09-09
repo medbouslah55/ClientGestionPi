@@ -16,9 +16,14 @@ const menuCoo = [
     link: "/Students_Coo",
   },
   {
-    icon: "card-view",
-    text: "Themes",
-    link: "/theme",
+    icon: "file-docs",
+    text: "Projects_Coo",
+    link: "/projects-cordinateur",
+  },
+  {
+    icon: "block-over",
+    text: "Users_Coo",
+    link: "/users",
   },
   {
     icon: "view-col",
@@ -26,9 +31,9 @@ const menuCoo = [
     link: "/classes_coo",
   },
   {
-    icon: "block-over",
-    text: "Users",
-    link: "/users",
+    icon: "card-view",
+    text: "Themes_Coo",
+    link: "/theme",
   },
   {
     heading: "Tuteur",

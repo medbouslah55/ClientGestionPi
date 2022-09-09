@@ -4,7 +4,7 @@ import { ProductContextProvider } from "../pages/pre-built/products/ProductConte
 import { UserContextProvider } from "../pages/pre-built/user-manage/UserContext";
 import { RedirectAs404 } from "../utils/Utils";
 
-import Homepage from "../pages/Homepage";
+import Homepage from "../pages/gestion-pi/pages/Homepage";
 import Crypto from "../pages/Crypto";
 import Analytics from "../pages/Analytics";
 import Invest from "../pages/Invest";
@@ -62,20 +62,23 @@ import EmailTemplate from "../pages/components/email-template/Email";
 import NioIconPage from "../pages/components/crafted-icons/NioIcon";
 import SVGIconPage from "../pages/components/crafted-icons/SvgIcons";
 
-import ClasseTuteur from "../pages/gestion-pi/pages/ClasseTuteur";
-import projects from "../pages/gestion-pi/pages/projects";
-import ClassCard from "../pages/gestion-pi/pages/ClassCard"
+import ClasseTuteur from "../pages/gestion-pi/pages/tuteur/ClasseTuteur";
+import projects from "../pages/gestion-pi/pages/tuteur/projects";
+import ClassCard from "../pages/gestion-pi/pages/coordinator/ClassCard"
 import ProjectCardPage from "../pages/pre-built/projects/ProjectCard";
 import ProjectListPage from "../pages/pre-built/projects/ProjectList";
-import Users from "../pages/gestion-pi/pages/Users";
-import Equipe from "../pages/gestion-pi/pages/Equipe";
+import GilleProject from "../pages/gestion-pi/pages/coordinator/GrilleProject"
+import CritereGrille from "../pages/gestion-pi/pages/coordinator/CritereGrille"
+import Users from "../pages/gestion-pi/pages/coordinator/Users";
+import Equipe from "../pages/gestion-pi/pages/tuteur/Equipe";
 import UserDetailsPage from "../pages/pre-built/user-manage/UserDetailsRegular";
 import UserListCompact from "../pages/pre-built/user-manage/UserListCompact";
 import UserProfileLayout from "../pages/pre-built/user-manage/UserProfileLayout";
 import KycListRegular from "../pages/pre-built/kyc-list-regular/KycListRegular";
+import Project_Coo from "../pages/gestion-pi/pages/coordinator/ProjectsCord";
 import KycDetailsRegular from "../pages/pre-built/kyc-list-regular/kycDetailsRegular";
-import TransListBasic from "../pages/gestion-pi/pages/Students";
-import Theme from "../pages/gestion-pi/pages/Theme";
+import TransListBasic from "../pages/gestion-pi/pages/tuteur/Students";
+import Theme from "../pages/gestion-pi/pages/coordinator/Theme";
 import ProductCard from "../pages/pre-built/products/ProductCard";
 import ProductList from "../pages/pre-built/products/ProductList";
 import ProductDetails from "../pages/pre-built/products/ProductDetails";
@@ -105,7 +108,7 @@ import QuillPreview from "../pages/components/forms/rich-editor/QuillPreview";
 import TinymcePreview from "../pages/components/forms/rich-editor/TinymcePreview";
 import KnobPreview from "../pages/components/charts/KnobPreview";
 import { FileManagerContextProvider } from "../pages/app/file-manager/FileManagerContext";
-import Students_Coo from "../pages/gestion-pi/pages/Students_Coo";
+import Students_Coo from "../pages/gestion-pi/pages/coordinator/Students_Coo";
 
 const Pages = () => {
   useLayoutEffect(() => {
@@ -134,6 +137,7 @@ const Pages = () => {
             </UserContextProvider>
           )}
         ></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/projects-cordinateur`} component={Project_Coo}></Route>
         <Route //Context Api added
           exact
           path={`${process.env.PUBLIC_URL}/user-list-compact`}
@@ -218,6 +222,8 @@ const Pages = () => {
         ></Route>
         <Route exact path={`${process.env.PUBLIC_URL}/classes_coo`} component={ClassCard}></Route>
         <Route exact path={`${process.env.PUBLIC_URL}/classe_tuteur`} component={ClasseTuteur}></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/grilleproject/:id`} component={GilleProject}></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/criteregrille/:id`} component={CritereGrille}></Route>
         <Route
           exact
           path={`${process.env.PUBLIC_URL}/app-file-manager/files`}

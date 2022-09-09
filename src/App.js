@@ -13,10 +13,10 @@ import Error504Classic from "./pages/error/504-classic";
 import Faq from "./pages/others/Faq";
 import Terms from "./pages/others/Terms";
 
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import Success from "./pages/auth/Success";
+import Login from "./pages/gestion-pi/pages/auth/Login";
+import Register from "./pages/gestion-pi/pages/auth/Register";
+import ForgotPassword from "./pages/gestion-pi/pages/auth/ForgotPassword";
+import Success from "./pages/gestion-pi/pages/auth/Success";
 import InvoicePrint from "./pages/pre-built/invoice/InvoicePrint";
 
 const App = () => {

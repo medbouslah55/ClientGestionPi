@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
 import {
   DropdownMenu,
   DropdownToggle,
@@ -19,7 +19,6 @@ import {
   BlockHeadContent,
   BlockTitle,
   Icon,
-  Row,
   Col,
   UserAvatar,
   PaginationComponent,
@@ -29,16 +28,14 @@ import {
   DataTableHead,
   DataTableRow,
   DataTableItem,
-  TooltipComponent,
   RSelect,
-} from "../../../components/Component";
-import { filterRole, filterStatus, userData } from "../../pre-built/user-manage/UserData";
-import { bulkActionOptions, findUpper } from "../../../utils/Utils";
-import { TuteurOptions, TuteurOption } from "../Options"
-import { Link, useHistory } from "react-router-dom";
+} from "../../../../components/Component";
+import { userData } from "../../../pre-built/user-manage/UserData";
+import { findUpper } from "../../../../utils/Utils";
+import { TuteurOptions, TuteurOption } from "../../Options"
 import { useForm } from "react-hook-form";
-import { UserContext } from "../../pre-built/user-manage/UserContext";
-import api from '../../../api'
+import { UserContext } from "../../../pre-built/user-manage/UserContext";
+import api from '../../../../api'
 
 const Users = () => {
   const { contextData } = useContext(UserContext);
@@ -49,10 +46,15 @@ const Users = () => {
   const [onSearch, setonSearch] = useState(true);
   const [onSearchText, setSearchText] = useState("");
   const [modal, setModal] = useState({
+    affect: false,
     edit: false,
     add: false,
   });
   const [editId, setEditedId] = useState();
+  const [formDataClasseTuteur, setFormDataClasseTuteur] = useState({
+    Tuteur: 0,
+    Classe: 0,
+  });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -74,6 +76,7 @@ const Users = () => {
   const [itemPerPage, setItemPerPage] = useState(10);
   const [sort, setSortState] = useState("");
   const [users, SetUsers] = useState([]);
+  const [classes, SetClasses] = useState([]);
 
   // Sorting data
   const sortFunc = (params) => {
@@ -95,7 +98,7 @@ const Users = () => {
       return item;
     });
     setData([...newData]);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); 
 
   // Changing state value when searching name
   useEffect(() => {
@@ -127,6 +130,11 @@ const Users = () => {
     return response.data;
   };
 
+  const retrieveAllClasses = async () => {
+    const response = await api.get("/classe");
+    return response.data;
+  };
+
   useEffect(() => {
     const getAllUsers = async () => {
       const allUsers = await retrieveUsers();
@@ -135,21 +143,27 @@ const Users = () => {
         SetUsers(allUsers);
       }
     };
+
+    const getAllClasses = async () => {
+      const allClasses = await retrieveAllClasses();
+
+      if (allClasses) {
+        SetClasses(allClasses);
+      }
+    };
+
+    getAllClasses();
     getAllUsers();
   }, []);
-  console.log(formDataa);
+  // console.log(formDataa);
 
   useEffect(() => {
     if (formDataa.isCoordinator === false) { setLabel("Tutor") }
     else { setLabel("Coordinator") }
   }, [formDataa])
 
-  // function to change the selected property of an item
-  const onSelectChange = (e, id) => {
-    let newData = data;
-    let index = newData.findIndex((item) => item.id === id);
-    newData[index].checked = e.currentTarget.checked;
-    setData([...newData]);
+  const onFormAddSubmit = async () => {
+    await api.post("/classetuteur", formDataClasseTuteur);
   };
 
   // function to reset the form
@@ -188,10 +202,8 @@ const Users = () => {
       })
     });
     await api.post("/tuteur", formData);
-    // setTimeout(() => Redirect(`${process.env.PUBLIC_URL}/user-list-regular`), 2000);
     resetForm();
     setModal({ add: false });
-    // history.push("/demo1/user-list-regular");
   };
 
   // submit function to update a new item
@@ -216,18 +228,29 @@ const Users = () => {
 
   };
 
+  const onAffectClick = (id) => {
+    users.forEach((item) => {
+      if (item.id === id) {
+        setFormDataa({
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          isCoordinator: item.isCoordinator,
+        });
+        setModal({ affect: true }, { edit: false }, { add: false });
+        setEditedId(id);
+        setFormDataClasseTuteur({ ...formDataClasseTuteur, Tuteur: item.id });
+      }
+    });
+  };
+
   // function which fires on applying selected action
   const onActionClick = async (e) => {
     if (actionText === "false") {
-      // const allUsers = await retrieveUsers();
-      // SetUsers(allUsers);
       let newData;
-      // SetUsers(allUsers);
       newData = users.filter((item) => item.isCoordinator === false);
       SetUsers([...newData]);
     } else if (actionText === "true") {
-      // const allUsers = await retrieveUsers();
-      // SetUsers(allUsers);
       let newData;
       newData = users.filter((item) => item.isCoordinator === true);
       SetUsers([...newData]);
@@ -235,11 +258,10 @@ const Users = () => {
     else if (actionText === "any") {
       const allUsers = await retrieveUsers();
       SetUsers(allUsers);
-      // let newData;
-      // newData = users.filter((item) => item.isCoordinator === true);
-      // SetUsers([...newData]);
     }
   };
+
+  console.log(formDataClasseTuteur);
 
   // function to toggle the search option
   const toggle = () => setonSearch(!onSearch);
@@ -252,7 +274,7 @@ const Users = () => {
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const { errors, register, handleSubmit } = useForm();
+  const { errors, register } = useForm();
 
   return (
     <React.Fragment>
@@ -300,7 +322,6 @@ const Users = () => {
                       <RSelect
                         options={TuteurOptions}
                         className="w-130px"
-                        // placeholder="Choice Role"
                         defaultValue={{ value: "any", label: "Any" }}
                         onChange={(e) => onActionText(e)}
                       />
@@ -360,8 +381,6 @@ const Users = () => {
                               <Button className="btn-icon btn-trigger toggle" onClick={() => updateTableSm(false)}>
                                 <Icon name="arrow-left"></Icon>
                               </Button>
-                            </li>
-                            <li>
                             </li>
                             <li>
                               <UncontrolledDropdown>
@@ -467,17 +486,6 @@ const Users = () => {
             </div>
             <DataTableBody>
               <DataTableHead>
-                {/* <DataTableRow className="nk-tb-col-check">
-                  <div className="custom-control custom-control-sm custom-checkbox notext">
-                    <input
-                      type="checkbox"
-                      className="custom-control-input form-control"
-                      onChange={(e) => selectorCheck(e)}
-                      id="uid"
-                    />
-                    <label className="custom-control-label" htmlFor="uid"></label>
-                  </div>
-                </DataTableRow> */}
                 <DataTableRow>
                   <span className="sub-text">ID</span>
                 </DataTableRow>
@@ -487,18 +495,9 @@ const Users = () => {
                 <DataTableRow>
                   <span className="sub-text">User</span>
                 </DataTableRow>
-                {/* <DataTableRow size="mb">
-                  <span className="sub-text">Balance</span>
-                </DataTableRow> */}
                 <DataTableRow size="md">
                   <span className="sub-text">Email</span>
                 </DataTableRow>
-                {/* <DataTableRow size="lg">
-                  <span className="sub-text">Verified</span>
-                </DataTableRow>
-                <DataTableRow size="lg">
-                  <span className="sub-text">Last Login</span>
-                </DataTableRow> */}
                 <DataTableRow size="md">
                   <span className="sub-text">Status</span>
                 </DataTableRow>
@@ -524,19 +523,6 @@ const Users = () => {
                           <span className="currency">{item.id} </span>
                         </span>
                       </DataTableRow>
-                      {/* <DataTableRow className="nk-tb-col-check">
-                          <div className="custom-control custom-control-sm custom-checkbox notext">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input form-control"
-                              defaultChecked={item.checked}
-                              id={item.id + "uid1"}
-                              key={Math.random()}
-                              onChange={(e) => onSelectChange(e, item.id)}
-                            />
-                            <label className="custom-control-label" htmlFor={item.id + "uid1"}></label>
-                          </div>
-                        </DataTableRow> */}
                       <DataTableRow>
                         <div className="user-card">
                           <UserAvatar
@@ -573,6 +559,18 @@ const Users = () => {
                               </DropdownToggle>
                               <DropdownMenu right>
                                 <ul className="link-list-opt no-bdr">
+                                <li onClick={() => onAffectClick(item.id)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="edit"></Icon>
+                                        <span>Affecter Tuteur a Classe</span>
+                                      </DropdownItem>
+                                    </li>
                                   <li onClick={() => onEditClick(item.id)}>
                                     <DropdownItem
                                       tag="a"
@@ -662,7 +660,6 @@ const Users = () => {
                         className="form-control"
                         type="text"
                         name="email"
-                        // defaultValue={formData.email}
                         placeholder="Enter email"
                         ref={register({
                           required: "This field is required",
@@ -683,7 +680,6 @@ const Users = () => {
                         className="form-control"
                         type="password"
                         name="password"
-                        // defaultValue={formData.balance}
                         placeholder="Password"
                         ref={register({ required: "This field is required" })}
                         onChange={e => setPassword(e.target.value)}
@@ -698,7 +694,6 @@ const Users = () => {
                         <RSelect
                           options={TuteurOption}
                           defaultValue={{ value: "false", label: "Tuteur" }}
-                          // onChange={(e) => setFormData({ ...formData, status: e.value })}
                           onChange={e => SetIsCoordinator(e.value)}
                         />
                       </div>
@@ -787,13 +782,9 @@ const Users = () => {
                     <FormGroup>
                       <label className="form-label">Status</label>
                       <div className="form-control-wrap">
-
-                        {/* {
-                        formDataa.isCoordinator === true ? setLabel ("Tuteur"): setLabel ("Cordinateur")} */}
                         <RSelect
                           options={TuteurOption}
                           defaultValue={{
-                            // value: formDataa.isCoordinator,
                             label: label,
                           }}
                           onChange={(e) => setFormDataa({ ...formDataa, isCoordinator: e.value })}
@@ -806,6 +797,102 @@ const Users = () => {
                       <li>
                         <Button color="primary" size="md" type="submit">
                           Update User
+                        </Button>
+                      </li>
+                      <li>
+                        <a
+                          href="#cancel"
+                          onClick={(ev) => {
+                            ev.preventDefault();
+                            onFormCancel();
+                          }}
+                          className="link link-light"
+                        >
+                          Cancel
+                        </a>
+                      </li>
+                    </ul>
+                  </Col>
+                </Form>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
+        <Modal
+          isOpen={modal.affect}
+          toggle={() => setModal({ affect: false })}
+          className="modal-dialog-centered"
+          size="lg"
+        >
+          <ModalBody>
+            <a
+              href="#cancel"
+              onClick={(ev) => {
+                ev.preventDefault();
+                onFormCancel();
+              }}
+              className="close"
+            >
+              <Icon name="cross-sm"></Icon>
+            </a>
+            <div className="p-2">
+              <h5 className="title">Affect Tuteur</h5>
+              <div className="mt-4">
+                <Form className="row gy-4" onSubmit={onFormAddSubmit}>
+                  <Col md="6">
+                    <FormGroup>
+                      <label className="form-label">Name</label>
+                      <input
+                        disabled
+                        className="form-control"
+                        type="text"
+                        name="name"
+                        defaultValue={formDataa.name}
+                        placeholder="Enter name"
+                        ref={register({ required: "This field is required" })}
+                        onChange={(e) => setFormDataa({ ...formDataa, name: e.target.value })}
+                      />
+                      {errors.name && <span className="invalid">{errors.name.message}</span>}
+                    </FormGroup>
+                  </Col>
+                  <Col md="6">
+                    <FormGroup>
+                      <label className="form-label">Email</label>
+                      <input
+                        disabled
+                        className="form-control"
+                        type="text"
+                        name="email"
+                        defaultValue={formDataa.email}
+                        placeholder="Enter email"
+                        ref={register({
+                          required: "This field is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "invalid email address",
+                          },
+                        })}
+                        onChange={(e) => setFormDataa({ ...formDataa, email: e.target.value })}
+                      />
+                      {errors.email && <span className="invalid">{errors.email.message}</span>}
+                    </FormGroup>
+                  </Col>
+                  <Col md="12">
+                    <FormGroup>
+                      <label className="form-label">List Classes</label>
+                      <div className="form-control-wrap">
+                        <RSelect
+                          options={classes}
+                          onChange={(e) => setFormDataClasseTuteur({ ...formDataClasseTuteur, Classe: e.ClasseId })}
+                        />
+                      </div>
+                    </FormGroup>
+                  </Col>
+                  <Col size="12">
+                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                      <li>
+                        <Button color="primary" size="md" type="submit">
+                          Affecter
                         </Button>
                       </li>
                       <li>

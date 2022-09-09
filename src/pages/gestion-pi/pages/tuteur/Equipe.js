@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
-import api from "../../../api/index";
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import api from "../../../../api/index";
 import {
   DropdownMenu,
   DropdownToggle,
@@ -25,10 +25,10 @@ import {
   Button,
   PreviewAltCard,
   RSelect,
-} from "../../../components/Component";
-import { Option } from "../Options";
+} from "../../../../components/Component";
+import { Option } from "../../Options";
 import { useForm } from "react-hook-form";
-import { UserContext } from "../../pre-built/user-manage/UserContext";
+import { UserContext } from "../../../pre-built/user-manage/UserContext";
 
 const Equipe = () => {
   const { contextData } = useContext(UserContext);
@@ -39,14 +39,13 @@ const Equipe = () => {
   const [equipes, SetEquipes] = useState([])
   const [projects, SetProjects] = useState([]);
   const [items, setItems] = useState([]);
-  const [id,setId] = useState (0);
+  const [id, setId] = useState(0);
   const [classes, SetClasses] = useState([]);
   const [advancedFilter, SetAdvancedFilter] = useState("Any Class");
   const [formData, setFormData] = useState({
-    EquipeName: "",
+    label: "",
     EquipeClass: "",
     EquipeOption: "",
-    EquipeDescription: "",
     Project: 0,
   });
   const [modal, setModal] = useState({
@@ -61,10 +60,9 @@ const Equipe = () => {
   // function to reset the form
   const resetForm = () => {
     setFormData({
-      EquipeName: "",
+      label: "",
       EquipeClass: "",
       EquipeOption: "",
-      EquipeDescription: "",
       Project: 0,
     });
   };
@@ -109,14 +107,13 @@ const Equipe = () => {
 
   // function that loads the want to editted data
   const onEditClick = (id) => {
-    data.forEach((item) => {
-      if (item.id === id) {
+    equipes.forEach((item) => {
+      if (item.EquipeId === id) {
         setFormData({
-          name: item.name,
-          designation: item.designation,
-          projects: item.projects,
-          performed: item.performed,
-          tasks: item.tasks,
+          label: item.label,
+          EquipeClass: item.EquipeClass,
+          EquipeOption: item.EquipeOption,
+          Project: item.Project,
         });
         setModal({ edit: true, add: false });
         setEditedId(id);
@@ -133,12 +130,15 @@ const Equipe = () => {
   };
 
   const retrieveEquipes = async () => {
-    const response = await api.get(`/equipe/${id}`);
-    return response.data;
+    if (id != null) {
+      const response = await api.get(`/equipe/${id}`);
+      return response.data;
+    }
   };
 
   const retrieveClasses = async () => {
     const response = await api.get("/classe");
+    console.log(response.data)
     return response.data;
   };
 
@@ -152,6 +152,14 @@ const Equipe = () => {
       return response.data;
     }
   };
+
+  const getNameProject = (id) => {
+
+    const project = projects.filter((p) => p.ProjectId === id)[0];
+    console.log(project)
+    if (project) { return project.label } else return null;
+  };
+
 
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem("user"));
@@ -178,10 +186,11 @@ const Equipe = () => {
         SetClasses(allClasse);
       };
     };
+
     getAllEquipe();
     getAllProjects();
     getAllClasse();
-  }, [id,advancedFilter]);
+  }, [id, advancedFilter]);
   console.log(formData);
 
   const { errors, register, handleSubmit } = useForm();
@@ -212,12 +221,6 @@ const Equipe = () => {
                 </a>
                 <div className="toggle-expand-content" style={{ display: smOption ? "block" : "none" }}>
                   <ul className="nk-block-tools g-3">
-                    {/* <li>
-                      <Button color="light" outline className="btn-white">
-                        <Icon name="download-cloud"></Icon>
-                        <span>Export</span>
-                      </Button>
-                    </li> */}
                     <li className="nk-block-tools-opt">
                       <Button color="primary" className="btn-icon" onClick={() => setModal({ add: true })}>
                         <Icon name="plus"></Icon>
@@ -237,21 +240,6 @@ const Equipe = () => {
                 <Col sm="6" lg="4" xxl="3" key={equipe.EquipeId}>
                   <PreviewAltCard>
                     <div className="team">
-                      {/* <div
-                        className={`team-status ${
-                          item.status === "Active"
-                            ? "bg-success text-white"
-                            : item.status === "Pending"
-                            ? "bg-warning text-white"
-                            : "bg-danger text-white"
-                        } `}
-                      >
-                        <Icon
-                          name={`${
-                            item.status === "Active" ? "check-thick" : item.status === "Pending" ? "clock" : "na"
-                          }`}
-                        ></Icon>
-                      </div> */}
                       <div className="team-options">
                         <UncontrolledDropdown>
                           <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
@@ -268,10 +256,9 @@ const Equipe = () => {
                                   }}
                                 >
                                   <Icon name="edit"></Icon>
-                                  <span>Edit</span>
+                                  <span>Edit Team</span>
                                 </DropdownItem>
                               </li>
-                              {/* {item.status !== "Suspend" && ( */}
                               <React.Fragment>
                                 <li className="divider"></li>
                                 <li onClick={() => suspendUser(theme.ThemeId)}>
@@ -293,16 +280,9 @@ const Equipe = () => {
                         </UncontrolledDropdown>
                       </div>
                       <div className="user-card user-card-s2">
-                        {/* <UserAvatar theme={item.avatarBg} className="md" text={findUpper(item.name)} image={item.image}>
-                          <div className="status dot dot-lg dot-success"></div>
-                        </UserAvatar> */}
-                        {/* <div className="user-info">
-                          <h6>{theme.T}</h6>
-                          <span className="sub-text">@{item.name.split(" ")[0].toLowerCase()}</span>
-                        </div> */}
                       </div>
                       <div className="team-details">
-                        <p><strong>{equipe.EquipeName}</strong></p>
+                        <p><strong>{equipe.label}</strong></p>
                       </div>
                       <ul className="team-statistics">
                         <li>
@@ -315,15 +295,10 @@ const Equipe = () => {
                         </li>
                         <li>
                           <span>Project</span>
-                          <span>{equipe.Project}</span>
+                          <span>{getNameProject(equipe.Project)}</span>
                         </li>
                       </ul>
                       <div className="team-view">
-                        {/* <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}>
-                          <Button outline color="light" className="btn-round w-150px">
-                            <span>View Profile</span>
-                          </Button>
-                        </Link> */}
                       </div>
                     </div>
                   </PreviewAltCard>
@@ -358,9 +333,9 @@ const Equipe = () => {
                         className="form-control"
                         ref={register({ required: "This field is required" })}
                         type="text"
-                        name="EquipeName"
+                        name="label"
                         onChange={(e) => onInputChange(e)}
-                        defaultValue={formData.EquipeName}
+                        defaultValue={formData.label}
                         placeholder="Enter name"
                       />
                       {errors.name && <span className="invalid">{errors.name.message}</span>}
@@ -371,7 +346,7 @@ const Equipe = () => {
                       <label className="form-label"> Option </label>
                       <RSelect options={Option} onChange={(e) => {
                         setFormData({ ...formData, EquipeOption: e.value })
-                         SetAdvancedFilter(e.value)
+                        SetAdvancedFilter(e.value)
                       }
                       }
                       />
@@ -381,8 +356,8 @@ const Equipe = () => {
                     <FormGroup>
                       <label className="form-label"> Class </label>
                       <FormGroup>
-                      <RSelect options={classes} onChange={(e) => setFormData({ ...formData, EquipeClass: e.label })} />
-                    </FormGroup>
+                        <RSelect options={classes} onChange={(e) => setFormData({ ...formData, EquipeClass: e.label })} />
+                      </FormGroup>
                     </FormGroup>
                   </Col>
                   <Col md="6">
@@ -391,20 +366,6 @@ const Equipe = () => {
                       <RSelect options={projects} onChange={(e) => setFormData({ ...formData, Project: e.ProjectId })} />
                     </FormGroup>
                   </Col>
-                  {/* <Col size="12">
-                      <FormGroup>
-                      <label className="form-label">Team Description</label>
-                      <textarea
-                        name="EquipeDescription"
-                        defaultValue={formData.EquipeDescription}
-                        placeholder="Your description"
-                        onChange={(e) => onInputChange(e)}
-                        className="form-control-xl form-control no-resize"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.description && <span className="invalid">{errors.description.message}</span>}
-                    </FormGroup>
-                  </Col> */}
                   <Col size="12">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
@@ -443,9 +404,9 @@ const Equipe = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update User</h5>
+              <h5 className="title">Update Team</h5>
               <div className="mt-4">
-                <Form className="row gy-4" onSubmit={handleSubmit(onEditSubmit)} noValidate>
+                <Form className="row gy-4" onSubmit={onEditSubmit} noValidate>
                   <Col md="6">
                     <FormGroup>
                       <label className="form-label">Name</label>
@@ -453,8 +414,8 @@ const Equipe = () => {
                         className="form-control"
                         ref={register({ required: "This field is required" })}
                         type="text"
-                        name="name"
-                        defaultValue={formData.name}
+                        name="label"
+                        defaultValue={formData.label}
                         placeholder="Enter name"
                       />
                       {errors.name && <span className="invalid">{errors.name.message}</span>}
@@ -462,16 +423,18 @@ const Equipe = () => {
                   </Col>
                   <Col md="6">
                     <FormGroup>
-                      <label className="form-label"> Designation </label>
-                      <input
-                        className="form-control"
-                        ref={register({ required: "This field is required" })}
-                        type="text"
-                        name="designation"
-                        defaultValue={formData.designation}
-                        placeholder="Enter Designation"
+                      <label className="form-label"> Option </label>
+                      <RSelect
+                        options={Option}
+                        onChange={(e) => {
+                          setFormData({ ...formData, EquipeOption: e.value })
+                          SetAdvancedFilter(e.value)
+                        }
+                        }
+                        defaultValue={{
+                          label: formData.EquipeOption,
+                        }}
                       />
-                      {errors.designation && <span className="invalid">{errors.designation.message}</span>}
                     </FormGroup>
                   </Col>
                   <Col md="4">
@@ -514,20 +477,6 @@ const Equipe = () => {
                       {errors.tasks && <span className="invalid">{errors.tasks.message}</span>}
                     </FormGroup>
                   </Col>
-                  {/* <Col size="12">
-                    <FormGroup>
-                      <label className="form-label">Project Description</label>
-                      <textarea
-                        name="ProjectDescription"
-                        defaultValue={formData.ProjectDescription}
-                        placeholder="Your description"
-                        onChange={(e) => onInputChange(e)}
-                        className="form-control-xl form-control no-resize"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.description && <span className="invalid">{errors.description.message}</span>}
-                    </FormGroup>
-                  </Col> */}
                   <Col size="12">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>

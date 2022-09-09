@@ -1,10 +1,10 @@
 import React from "react";
-import Logo from "../../images/logo.png";
-import LogoDark from "../../images/logo-dark.png";
-import PageContainer from "../../layout/page-container/PageContainer";
-import Head from "../../layout/head/Head";
+import Logo from "../../../../images/logo.png";
+import LogoDark from "../../../../images/logo-dark.png";
+import PageContainer from "../../../../layout/page-container/PageContainer";
+import Head from "../../../../layout/head/Head";
 import AuthFooter from "./AuthFooter";
-import { Block, BlockContent, BlockDes, BlockHead, BlockTitle } from "../../components/Component";
+import { Block, BlockContent, BlockDes, BlockHead, BlockTitle } from "../../../../components/Component";
 import { Link } from "react-router-dom";
 
 const Success = () => {

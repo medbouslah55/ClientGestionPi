@@ -1,9 +1,9 @@
 import React from "react";
-import EnglishFlag from "../../images/flags/english.png";
-import SpanishFlag from "../../images/flags/spanish.png";
-import FrenchFlag from "../../images/flags/french.png";
-import TurkeyFlag from "../../images/flags/turkey.png";
-import { Row, Col } from "../../components/Component";
+// import EnglishFlag from "../../../../images/englishflag.png";
+// import SpanishFlag from "../../images/flags/spanish.png";
+// import FrenchFlag from "../../images/flags/french.png";
+// import TurkeyFlag from "../../images/flags/turkey.png";
+import { Row, Col } from "../../../../components/Component";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 
@@ -48,7 +48,7 @@ const AuthFooter = () => {
                           }}
                           className="language-item"
                         >
-                          <img src={EnglishFlag} alt="" className="language-flag" />
+                          {/* <img src={EnglishFlag} alt="" className="language-flag" /> */}
                           <span className="language-name">English</span>
                         </DropdownItem>
                       </li>
@@ -61,7 +61,7 @@ const AuthFooter = () => {
                           }}
                           className="language-item"
                         >
-                          <img src={SpanishFlag} alt="" className="language-flag" />
+                          {/* <img src={SpanishFlag} alt="" className="language-flag" /> */}
                           <span className="language-name">Español</span>
                         </DropdownItem>
                       </li>
@@ -74,7 +74,7 @@ const AuthFooter = () => {
                           }}
                           className="language-item"
                         >
-                          <img src={FrenchFlag} alt="" className="language-flag" />
+                          {/* <img src={FrenchFlag} alt="" className="language-flag" /> */}
                           <span className="language-name">Français</span>
                         </DropdownItem>
                       </li>
@@ -87,7 +87,7 @@ const AuthFooter = () => {
                           }}
                           className="language-item"
                         >
-                          <img src={TurkeyFlag} alt="" className="language-flag" />
+                          {/* <img src={TurkeyFlag} alt="" className="language-flag" /> */}
                           <span className="language-name">Türkçe</span>
                         </DropdownItem>
                       </li>

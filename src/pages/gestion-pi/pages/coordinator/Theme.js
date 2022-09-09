@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
-import api from '../../../api'
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import api from '../../../../api'
 import {
   UncontrolledDropdown,
   DropdownMenu,
@@ -30,9 +30,9 @@ import {
   DataTableItem,
   PaginationComponent,
   RSelect,
-} from "../../../components/Component";
-import {orderData } from "../../pre-built/trans-list/TransData";
-import {Options,Option} from '../Options'
+} from "../../../../components/Component";
+import {orderData } from "../../../pre-built/trans-list/TransData";
+import {Options,Option} from '../../Options'
 import { useForm } from "react-hook-form";
 
 const Theme = () => {
@@ -172,8 +172,7 @@ const Theme = () => {
                   <ul className="btn-toolbar gx-1">
                     <li className="btn-toolbar-sep"></li>
                     <li>
-                      <UncontrolledDropdown>
-                      
+                      <UncontrolledDropdown> 
                         <DropdownToggle tag="a" className="btn btn-trigger btn-icon dropdown-toggle">
                           <Icon name="filter-alt"></Icon>
                         </DropdownToggle>
@@ -310,6 +309,10 @@ const Theme = () => {
                 <DataTableRow>
                   <span>Description</span>
                 </DataTableRow>
+                <DataTableRow>
+                  <span>&nbsp;</span>
+                </DataTableRow>
+                
               </DataTableHead>
 
               {currentItems.length > 0
@@ -330,6 +333,19 @@ const Theme = () => {
                       <DataTableRow >
                         <span className="tb-amount">{theme.ThemeDescription}</span>
                       </DataTableRow>
+                      <DataTableRow>
+                       
+                  <a
+                    href="#delete"
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                    }}
+                    className="link-cross mr-sm-n1"
+                  > 
+                    <Icon name="cross"></Icon>
+                   </a>
+                 
+                </DataTableRow>
                     </DataTableItem>
                   );
                 })

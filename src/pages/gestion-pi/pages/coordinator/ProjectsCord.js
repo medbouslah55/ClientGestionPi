@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../api/index";
-import Head from "../../../layout/head/Head";
-import Content from "../../../layout/content/Content";
+import api from "../../../../api/index";
+import Head from "../../../../layout/head/Head";
+import Content from "../../../../layout/content/Content";
 import {
   Block,
   BlockHead,
@@ -16,10 +16,9 @@ import {
   UserAvatar,
   Col,
   RSelect,
-} from "../../../components/Component";
-import { Option } from "../Options";
-import { projectData} from "../../pre-built/projects/ProjectData";
-import { findUpper} from "../../../utils/Utils";
+} from "../../../../components/Component";
+import { Option } from "../../Options";
+import { findUpper} from "../../../../utils/Utils";
 import {
   DropdownMenu,
   DropdownToggle,
@@ -32,19 +31,13 @@ import {
 } from "reactstrap";
 import { useForm } from "react-hook-form";
 
-const projects = () => {
+const ProjectsCord = () => {
   const [sm, updateSm] = useState(false);
   const [modal, setModal] = useState({
     add: false,
     edit: false,
   });
-  const [editId, setEditedId] = useState();
-  const [data, setData] = useState(projectData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage] = useState(8);
-  const [id,setId]=useState(0);
   const [projectss, SetProjectss] = useState([]);
-  const [items, setItems] = useState([]);
   const [themes, SetThemes] = useState([]);
   const [advancedFilter, SetAdvancedFilter] = useState("Any Class");
   const [formData, setFormData] = useState({
@@ -70,8 +63,7 @@ const projects = () => {
   };
 
   const retrieveProjects = async () => {
-    const response = await api.get(`/project2/${id}`);
-    // console.log(response.data);
+    const response = await api.get("/project");
     return response.data;
   };
 
@@ -87,12 +79,7 @@ const projects = () => {
   }
 
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem("user"));
-    if (items) {
-      setItems(items);
-      setId(items.id);
-    }
-
+    
     const getAllProjects = async () => {
       const allProjets = await retrieveProjects();
 
@@ -109,14 +96,10 @@ const projects = () => {
     getAllProjects();
     getAllThemes();
 
-  }, [id,advancedFilter]);
+  }, [advancedFilter]);
 
   console.log(formData)
 
-  const retrieveThems = async () => {
-    const response = await api.get("/theme");
-
-  }
   //Add project
   const onFormAddSubmit = async () => {
     await api.post("/project", formData);
@@ -157,15 +140,13 @@ const projects = () => {
     });
   };
 
-  // Get current list, pagination
-  const indexOfLastItem = currentPage * itemPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const getNameTheme = (id) => {
 
-  // Change Page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const theme = themes.filter((p)=>p.ThemeId === id)[0];
+    if(theme){return theme.label}  else return null ;
+  };
 
-  const { errors, register, handleSubmit } = useForm();
+  const { errors, register,  } = useForm();
 
   return (
     <React.Fragment>
@@ -204,7 +185,6 @@ const projects = () => {
           <Row className="g-gs">
             {projectss &&
               projectss.map((projet) => {
-                // var days = setDeadlineDays(projet.deadline);
                 return (
                   <Col sm="6" lg="4" xxl="3" key={projet.ProjectId}>
                     <ProjectCard>
@@ -420,7 +400,7 @@ const projects = () => {
                       options={themes} 
                       onChange={(e) => setFormData({ ...formData, Theme : e.ThemeId })}
                       defaultValue={{
-                        label: formData.Theme,
+                        label: getNameTheme(formData.Theme),
                       }}
                        />
                     </FormGroup>
@@ -468,4 +448,4 @@ const projects = () => {
     </React.Fragment>
   );
 };
-export default projects;
+export default ProjectsCord;

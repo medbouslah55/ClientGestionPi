@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
-import api from "../../../api/index";
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import api from "../../../../api/index";
 import {
  DropdownMenu,
  DropdownToggle,
@@ -26,12 +26,8 @@ import {
  UserAvatar,
  Button,
  PreviewAltCard,
-} from "../../../components/Component";
-import { Link } from "react-router-dom";
-import { userData } from "../../pre-built/user-manage/UserData";
-import { findUpper } from "../../../utils/Utils";
+} from "../../../../components/Component";
 import { useForm } from "react-hook-form";
-import { UserContext } from "../../pre-built/user-manage/UserContext";
  
 const ClassCard = () => {
  const [selectedFile, SetselectedFile] = useState(null);

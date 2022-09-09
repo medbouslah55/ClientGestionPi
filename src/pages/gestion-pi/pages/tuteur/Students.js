@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
-import api from '../../../api'
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import api from '../../../../api'
 import {
   UncontrolledDropdown,
   DropdownMenu,
@@ -25,9 +25,8 @@ import {
   Col,
   PaginationComponent,
   RSelect,
-} from "../../../components/Component";
-import { statusOptions } from "../../pre-built/trans-list/TransData";
-import { dateFormatterAlt } from "../../../utils/Utils";
+} from "../../../../components/Component";
+import { dateFormatterAlt } from "../../../../utils/Utils";
 import { useForm } from "react-hook-form";
 
 const Students = () => {
@@ -37,13 +36,12 @@ const Students = () => {
   const [modal, setModal] = useState({
     add: false,
   });
-  const [viewModal, setViewModal] = useState(false);
-  const [detail, setDetail] = useState({});
   const [data, setData] = useState([]);
   const [items, setItems] = useState([]);
   const [equipes, SetEquipes] = useState([]);
   const [classes, SetClasses] = useState([]);
-  const [id,setId]=useState(0);
+  const [advancedFilter, SetAdvancedFilter] = useState("Any Class");
+  const [id, setId] = useState();
   const [formData, setFormData] = useState({
     // EtudiantId:"",
     EtudiantName: "",
@@ -56,8 +54,14 @@ const Students = () => {
   const [etudiants, SetEtudiants] = useState([]);
 
   const retrieveEquipes = async () => {
-    const response = await api.get("/equipe");
-    return response.data;
+    if (advancedFilter === "Any Class") {
+      const response = await api.get("/equipe");
+      return response.data;
+    }
+    else {
+      const response = await api.get("/equipe2/" + advancedFilter);
+      return response.data;
+    }
   };
 
   const retrieveClasses = async () => {
@@ -66,9 +70,19 @@ const Students = () => {
   };
 
   const retrieveEtudiants = async () => {
-    const response = await api.get(`/etudiant/${id}`);
-    return response.data;
+    if (id != null) {
+      const response = await api.get(`/etudiant/${id}`);
+      return response.data
+    };
   }
+
+  const getNameEquipe = (id) => {
+
+    const equipe = equipes.filter((p)=>p.EquipeId === id)[0];
+    console.log(equipe)
+    if(equipe){return equipe.label}  else return null ;
+  };
+
   // console.log(items.id)
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem("user"));
@@ -96,7 +110,7 @@ const Students = () => {
     getAllClasse();
     getAllEquipe();
     getAllEtudiant();
-  }, [id]);
+  }, [id, advancedFilter]);
 
   const sortingFunc = (params) => {
     let defaultData = data;
@@ -133,7 +147,7 @@ const Students = () => {
       EtudiantClass: "",
     });
   };
-console.log(id)
+  console.log(id)
   // function to close the form modal
   const onFormCancel = () => {
     setModal({ add: false });
@@ -173,7 +187,7 @@ console.log(id)
           EtudiantId: item.EtudiantId,
           EtudiantName: item.EtudiantName,
           EtudiantClass: item.EtudiantClass,
-          Equipe:item.Equipe
+          Equipe: item.Equipe
           // isCoordinator: item.isCoordinator
         });
         setModal({ edit: true }, { add: false });
@@ -189,7 +203,7 @@ console.log(id)
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const { errors, register, handleSubmit } = useForm();
+  const { errors, register } = useForm();
 
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
@@ -243,6 +257,7 @@ console.log(id)
                           </DropdownToggle>
                           <DropdownMenu right>
                             <ul className="link-check">
+                              
                               <li>
                                 <span>Show</span>
                               </li>
@@ -376,7 +391,7 @@ console.log(id)
                               </div>
                               <div className="tb-tnx-date">
                                 <span className="date">{etudiant.EtudiantClass}</span>
-                                <span className="date">{etudiant.Equipe}</span>
+                                <span className="date">{getNameEquipe(etudiant.Equipe)}</span>
                               </div>
                             </td>
                             <td className="tb-tnx-action">
@@ -398,7 +413,7 @@ console.log(id)
                                         }}
                                       >
                                         <Icon name="edit"></Icon>
-                                        <span>Update Student</span>
+                                        <span>Affect Student</span>
                                       </DropdownItem>
                                     </li>
                                     {/* <li
@@ -491,19 +506,27 @@ console.log(id)
                     </FormGroup>
                   </Col>
                   <Col md="6">
-                      <label className="form-label">Classe</label>
-                      <FormGroup>
-                      <RSelect options={classes} onChange={(e) => setFormData({ ...formData, EtudiantClass: e.label })} />
-                    </FormGroup>                      
+                    <label className="form-label">Classe</label>
+                    <FormGroup>
+                      <RSelect
+                        options={classes}
+                        onChange={(e) => {
+                          setFormData({ ...formData, EtudiantClass: e.label })
+                          SetAdvancedFilter(e.label)
+                        }} />
+                    </FormGroup>
                   </Col>
                   <Col md="12">
                     <FormGroup>
-                      <label className="form-label">Groupe</label>
+                      <label className="form-label">Equipe</label>
                       <div className="form-control-wrap">
                         <RSelect
-                          options={statusOptions}
+                          options={equipes}
+                          onChange={(e) => setFormData({ ...formData, Equipe : e.EquipeId })}
+
                         // defaultValue={{ value: "Paid", label: "Paid" }}
-                        // onChange={(e) => setFormData({ ...formData, status: e.value })}
+                        // onChange={(e) => setFormData({ ...formData, status: e.value })}*
+
                         />
                       </div>
                     </FormGroup>
@@ -549,13 +572,14 @@ console.log(id)
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update Student</h5>
+              <h5 className="title">Affect Student</h5>
               <div className="mt-4">
                 <Form className="row gy-4" onSubmit={onEditSubmit}>
                   <Col md="6">
                     <FormGroup>
                       <label className="form-label">Nom & Prénom</label>
                       <input
+                      disabled
                         className="form-control"
                         type="text"
                         name="EtudiantName"
@@ -568,23 +592,13 @@ console.log(id)
                     </FormGroup>
                   </Col>
                   <Col md="6">
-                      <label className="form-label">Class</label>
-                      <FormGroup>
-                      <RSelect 
-                      options={classes} 
-                      onChange={(e) => setFormData({ ...formData, EtudiantClass: e.label })}
-                      defaultValue={{label :formData.EtudiantClass}}
-                      />
-                    </FormGroup>
-                  </Col>
-                  <Col md="12">
                     <FormGroup>
-                      <label className="form-label">Groupe</label>
+                      <label className="form-label">Equipe</label>
                       <RSelect
                         options={equipes}
                         onChange={(e) => setFormData({ ...formData, Equipe: e.EquipeId })}
                         defaultValue={{
-                          label: formData.Equipe,
+                          label: getNameEquipe(formData.Equipe),
                         }}
                       />
                     </FormGroup>
@@ -593,7 +607,7 @@ console.log(id)
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
                         <Button color="primary" size="md" type="submit">
-                          Update Student
+                          Affect Student
                         </Button>
                       </li>
                       <li>

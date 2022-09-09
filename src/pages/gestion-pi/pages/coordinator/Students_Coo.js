@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
 import {
   DropdownMenu,
   DropdownToggle,
@@ -20,15 +20,16 @@ import {
   BlockHeadContent,
   BlockTitle,
   Icon,
+  BlockDes,
   Col,
+  Row,
   Button,
   RSelect,
-} from "../../../components/Component";
-import { userData } from "../../pre-built/user-manage/UserData";
+} from "../../../../components/Component";
+import { userData } from "../../../pre-built/user-manage/UserData";
 import { useForm } from "react-hook-form";
-import { UserContext } from "../../pre-built/user-manage/UserContext";
-import api from "../../../api";
-import { statusOptions } from "../../pre-built/trans-list/TransData";
+import { UserContext } from "../../../pre-built/user-manage/UserContext";
+import api from "../../../../api";
 
 const Students_Coo = () => {
 
@@ -62,6 +63,9 @@ const Students_Coo = () => {
   const [data, setData] = contextData;
 
   const [sm, updateSm] = useState(false);
+  const [classes, SetClasses] = useState([]);
+  const [equipes, SetEquipes] = useState([]);
+  const [editId, setEditedId] = useState();
   const [onSearch, setonSearch] = useState(true);
   const [onSearchText, setSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -72,27 +76,68 @@ const Students_Coo = () => {
   const [formData, setFormData] = useState({
     EtudiantName: "",
     EtudiantClass: "",
+    Equipe: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [advancedFilter, SetAdvancedFilter] = useState("Any Class");
+  const [advancedGetFilter, SetAdvancedGetFilter] = useState("Any Class");
   const [itemPerPage, setItemPerPage] = useState(10);
-  const [sort, setSortState] = useState("");
   const [etudiants, SetEtudiants] = useState([]);
 
   const retrieveEtudiants = async () => {
-    const response = await api.get("/etudiant");
-    return response.data;
+    if (advancedGetFilter === "Any Class") {
+      const response = await api.get("/etudiant2");
+      return response.data;
+    }
+    else {
+      const response = await api.get("/etudiant2/"+ advancedGetFilter);
+      return response.data;
+    }
   }
+
+  const retrieveClasses = async () => {
+    const response = await api.get("/classe");
+    return response.data;
+  };
+
+  const retrieveEquipes = async () => {
+    if (advancedFilter === "Any Class") {
+      const response = await api.get("/equipe");
+      return response.data;
+    }
+    else {
+      const response = await api.get("/equipe2/" + advancedFilter);
+      return response.data;
+    }
+  };
+
   useEffect(() => {
     const getAllEtudiant = async () => {
       const allEtudiant = await retrieveEtudiants();
       if (allEtudiant) {SetEtudiants(allEtudiant); setData(allEtudiant)};
     };
+
+    const getAllEquipe = async () => {
+      const allEquipe = await retrieveEquipes();
+      if (allEquipe) {
+        SetEquipes(allEquipe);
+      };
+    };
+
+    const getAllClasse = async () => {
+      const allClasse = await retrieveClasses();
+      if (allClasse) {
+        SetClasses(allClasse);
+      };
+    }
+    getAllEquipe();
+    getAllClasse();
     getAllEtudiant();
-  }, []);
+  }, [advancedFilter,advancedGetFilter]);
   const onFormAddSubmit = async () => {
     const response = await api.post("/etudiant",formData);
   };
-
+  console.log(formData);
   // unselects the data on mount
   useEffect(() => {
     let newData;
@@ -137,6 +182,33 @@ const Students_Coo = () => {
     resetForm();
   };
 
+  const onEditSubmit = async () => {
+    await api.put("/etudiant", formData);
+  };
+
+  const onEditClick = (id) => {
+    etudiants.forEach((item) => {
+      if (item.EtudiantId === id) {
+        setFormData({
+          EtudiantId: item.EtudiantId,
+          EtudiantName: item.EtudiantName,
+          EtudiantClass: item.EtudiantClass,
+          Equipe: item.Equipe
+          // isCoordinator: item.isCoordinator
+        });
+        setModal({ edit: true }, { add: false });
+        setEditedId(id);
+      }
+    });
+
+  };
+  console.log(advancedGetFilter);
+  const getNameEquipe = (id) => {
+
+    const equipe = equipes.filter((p)=>p.EquipeId === id)[0];
+    if(equipe){return equipe.label}  else return null ;
+  };
+
   // function to toggle the search option
   const toggle = () => setonSearch(!onSearch);
 
@@ -144,9 +216,6 @@ const Students_Coo = () => {
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = etudiants.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Change Page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const { errors, register } = useForm();
   return (
@@ -159,9 +228,9 @@ const Students_Coo = () => {
               <BlockTitle tag="h3" page>
                 Students_Coo
               </BlockTitle>
-              {/* <BlockDes className="text-soft">
-                <p>You have total 2,595 users.</p>
-              </BlockDes> */}
+              <BlockDes className="text-soft">
+                <p>You have total {etudiants.length} students.</p>
+              </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
               <div className="toggle-wrap nk-block-tools-toggle">
@@ -208,74 +277,33 @@ const Students_Coo = () => {
                       </li>
                       <li className="btn-toolbar-sep"></li>
                       <li>
-                        <UncontrolledDropdown>
-                          <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
-                            <Icon name="setting"></Icon>
-                          </DropdownToggle>
-                          <DropdownMenu right>
-                            <ul className="link-check">
-                              <li>
-                                <span>Show</span>
-                              </li>
-                              <li className={itemPerPage === 10 ? "active" : ""}>
-                                <DropdownItem
-                                  tag="a"
-                                  href="#dropdownitem"
-                                  onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setItemPerPage(10);
-                                  }}
-                                >
-                                  10
-                                </DropdownItem>
-                              </li>
-                              <li className={itemPerPage === 15 ? "active" : ""}>
-                                <DropdownItem
-                                  tag="a"
-                                  href="#dropdownitem"
-                                  onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setItemPerPage(15);
-                                  }}
-                                >
-                                  15
-                                </DropdownItem>
-                              </li>
-                            </ul>
-                            <ul className="link-check">
-                              <li>
-                                <span>Order</span>
-                              </li>
-                              <li className={sort === "dsc" ? "active" : ""}>
-                                <DropdownItem
-                                  tag="a"
-                                  href="#dropdownitem"
-                                  onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setSortState("dsc");
-                                    sortingFunc("dsc");
-                                  }}
-                                >
-                                  DESC
-                                </DropdownItem>
-                              </li>
-                              <li className={sort === "asc" ? "active" : ""}>
-                                <DropdownItem
-                                  tag="a"
-                                  href="#dropdownitem"
-                                  onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setSortState("asc");
-                                    sortingFunc("asc");
-                                  }}
-                                >
-                                  ASC
-                                </DropdownItem>
-                              </li>
-                            </ul>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </li>
+                      <UncontrolledDropdown> 
+                        <DropdownToggle tag="a" className="btn btn-trigger btn-icon dropdown-toggle">
+                          <Icon name="filter-alt"></Icon>
+                        </DropdownToggle>
+                        <DropdownMenu right className="filter-wg dropdown-menu-xl">
+                          <div className="dropdown-head">
+                            <span className="sub-title dropdown-title">Advanced Filter</span>
+                            <div className="dropdown">
+                            </div>
+                          </div>
+                          <div className="dropdown-body dropdown-body-rg">
+                            <Row className="gx-6 gy-4">
+                              <Col size="12">
+                                <FormGroup>
+                                  <label className="overline-title overline-title-alt">Classe</label>
+                                  <RSelect options={classes} placeholder="Any Class"
+                                    onChange={(e) => SetAdvancedGetFilter(e.label)}
+                                  />
+                                </FormGroup>
+                              </Col>
+                            </Row>
+                          </div>
+                          <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+                          <br /><br /><br /><br />
+                        </DropdownMenu>
+                      </UncontrolledDropdown>
+                    </li>
                     </ul>
                   </div>
                   <div className={`card-search search-wrap ${!onSearch ? "active" : ""}`}>
@@ -315,17 +343,12 @@ const Students_Coo = () => {
                           <span>Nom & Prénom </span>
                         </span>
                         <span className="tb-tnx-date d-md-inline-block d-none">
-                          {/* <span className="d-md-none">Date</span> */}
                           <span className="d-none d-md-block">
                             <span>Classe</span>
                             <span>Nom d'équipe</span>
                           </span>
                         </span>
                       </th>
-                      {/* <th className="tb-tnx-amount is-alt">
-                        <span className="tb-tnx-total">Total</span>
-                        <span className="tb-tnx-status d-none d-md-inline-block">Status</span>
-                      </th> */}
                       <th className="tb-tnx-action">
                         <span>&nbsp;</span>
                       </th>
@@ -352,22 +375,9 @@ const Students_Coo = () => {
                               </div>
                               <div className="tb-tnx-date">
                                 <span className="date">{etudiant.EtudiantClass}</span>
-                                <span className="date">....</span>
+                                <span className="date">{getNameEquipe(etudiant.Equipe)}</span>
                               </div>
                             </td>
-                            {/* <td className="tb-tnx-amount is-alt">
-                              <div className="tb-tnx-total">
-                                <span className="amount">$...</span>
-                              </div>
-                              <div className="tb-tnx-status">
-                                <span
-                                  className={`badge badge-dot badge-${item.status === "Paid" ? "success" : item.status === "Due" ? "warning" : "danger"
-                                    }`}
-                                >
-                                  {item.status}
-                                </span>
-                              </div>
-                            </td> */}
                             <td className="tb-tnx-action">
                               <UncontrolledDropdown>
                                 <DropdownToggle
@@ -378,7 +388,19 @@ const Students_Coo = () => {
                                 </DropdownToggle>
                                 <DropdownMenu right>
                                   <ul className="link-list-plain">
-                                    <li
+                                    <li onClick={() => onEditClick(etudiant.EtudiantId)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="edit"></Icon>
+                                        <span>Update Student</span>
+                                      </DropdownItem>
+                                    </li>
+                                    {/* <li
                                       onClick={() => {
                                         loadDetail(item.id);
                                         setViewModal(true);
@@ -404,7 +426,7 @@ const Students_Coo = () => {
                                       >
                                         Print
                                       </DropdownItem>
-                                    </li>
+                                    </li> */}
                                   </ul>
                                 </DropdownMenu>
                               </UncontrolledDropdown>
@@ -418,13 +440,6 @@ const Students_Coo = () => {
               </div>
               <div className="card-inner">
                 {etudiants.length > 0 ? (
-                  // <PaginationComponent
-                  //   noDown
-                  //   itemPerPage={itemPerPage}
-                  //   totalItems={data.length}
-                  //   paginate={paginate}
-                  //   currentPage={currentPage}
-                  // />
                   <div></div>
                 ) : (
                   <div className="text-center">
@@ -435,6 +450,7 @@ const Students_Coo = () => {
             </div>
           </Card>
         </Block>
+
         <Modal isOpen={modal.add} toggle={() => setModal({ add: false })} className="modal-dialog-centered" size="lg">
           <ModalBody>
             <a
@@ -467,50 +483,27 @@ const Students_Coo = () => {
                     </FormGroup>
                   </Col>
                   <Col md="6">
+                    <label className="form-label">Classe</label>
                     <FormGroup>
-                      <label className="form-label">Classe</label>
-                      <input
-                        className="form-control"
-                        // ref={register({ required: "This field is required" })}
-                        type="text"
-                        name="EtudiantClass"
-                        placeholder="Enter class"
-                        value={formData.EtudiantClass}
-                        onChange={(e) => setFormData({ ...formData, EtudiantClass: e.target.value })}
-                      />
-                      {errors.total && <span className="invalid">{errors.total.message}</span>}
+                      <RSelect
+                        options={classes}
+                        onChange={(e) => {
+                          setFormData({ ...formData, EtudiantClass: e.label })
+                          SetAdvancedFilter(e.label)
+                        }} />
                     </FormGroup>
                   </Col>
-                  {/* <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Issue Date</label>
-                      <DatePicker
-                        selected={formData.issue}
-                        className="form-control"
-                        onChange={(date) => setFormData({ ...formData, issue: date })}
-                        minDate={new Date()}
-                      />
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Due Date</label>
-                      <DatePicker
-                        selected={formData.due}
-                        className="form-control"
-                        onChange={(date) => setFormData({ ...formData, due: date })}
-                        minDate={new Date()}
-                      />
-                    </FormGroup>
-                  </Col> */}
                   <Col md="12">
                     <FormGroup>
-                      <label className="form-label">Groupe</label>
+                      <label className="form-label">Equipe</label>
                       <div className="form-control-wrap">
                         <RSelect
-                          options={statusOptions}
-                          // defaultValue={{ value: "Paid", label: "Paid" }}
-                          // onChange={(e) => setFormData({ ...formData, status: e.value })}
+                          options={equipes}
+                          onChange={(e) => setFormData({ ...formData, Equipe : e.EquipeId })}
+
+                        // defaultValue={{ value: "Paid", label: "Paid" }}
+                        // onChange={(e) => setFormData({ ...formData, status: e.value })}*
+
                         />
                       </div>
                     </FormGroup>
@@ -605,7 +598,7 @@ const Students_Coo = () => {
           </ModalBody>
         </Modal>
 
-        {/* <Modal isOpen={modal.edit} toggle={() => setModal({ edit: false })} className="modal-dialog-centered" size="lg">
+        <Modal isOpen={modal.edit} toggle={() => setModal({ edit: false })} className="modal-dialog-centered" size="lg">
           <ModalBody>
             <a
               href="#cancel"
@@ -618,91 +611,51 @@ const Students_Coo = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update User</h5>
+              <h5 className="title">Update Student</h5>
               <div className="mt-4">
-                <Form className="row gy-4" onSubmit={handleSubmit(onEditSubmit)}>
+                <Form className="row gy-4" onSubmit={onEditSubmit}>
                   <Col md="6">
                     <FormGroup>
-                      <label className="form-label">Name</label>
+                      <label className="form-label">Nom & Prénom</label>
                       <input
                         className="form-control"
                         type="text"
-                        name="name"
-                        defaultValue={formData.name}
+                        name="EtudiantName"
+                        defaultValue={formData.EtudiantName}
                         placeholder="Enter name"
                         ref={register({ required: "This field is required" })}
+                        onChange={e => setFormData({ ...formData, EtudiantName: e.target.value })}
                       />
                       {errors.name && <span className="invalid">{errors.name.message}</span>}
                     </FormGroup>
                   </Col>
                   <Col md="6">
+                    <label className="form-label">Class</label>
                     <FormGroup>
-                      <label className="form-label">Email</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="email"
-                        defaultValue={formData.email}
-                        placeholder="Enter email"
-                        ref={register({
-                          required: "This field is required",
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: "invalid email address",
-                          },
-                        })}
+                      <RSelect
+                        options={classes}
+                        onChange={(e) => setFormData({ ...formData, EtudiantClass: e.label })}
+                        defaultValue={{ label: formData.EtudiantClass }}
                       />
-                      {errors.email && <span className="invalid">{errors.email.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Balance</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="balance"
-                        disabled
-                        defaultValue={parseFloat(formData.balance.replace(/,/g, ""))}
-                        placeholder="Balance"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.balance && <span className="invalid">{errors.balance.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="phone"
-                        defaultValue={Number(formData.phone)}
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.phone && <span className="invalid">{errors.phone.message}</span>}
                     </FormGroup>
                   </Col>
                   <Col md="12">
                     <FormGroup>
-                      <label className="form-label">Status</label>
-                      <div className="form-control-wrap">
-                        <RSelect
-                          options={filterStatus}
-                          defaultValue={{
-                            value: formData.status,
-                            label: formData.status,
-                          }}
-                          onChange={(e) => setFormData({ ...formData, status: e.value })}
-                        />
-                      </div>
+                      <label className="form-label">Equipe</label>
+                      <RSelect
+                        options={equipes}
+                        onChange={(e) => setFormData({ ...formData, Equipe: e.EquipeId })}
+                        defaultValue={{
+                          label: getNameEquipe(formData.Equipe),
+                        }}
+                      />
                     </FormGroup>
                   </Col>
                   <Col size="12">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
                         <Button color="primary" size="md" type="submit">
-                          Update User
+                          Update Student
                         </Button>
                       </li>
                       <li>
@@ -723,7 +676,8 @@ const Students_Coo = () => {
               </div>
             </div>
           </ModalBody>
-        </Modal> */}
+        </Modal>
+
       </Content>
     </React.Fragment>
   );
