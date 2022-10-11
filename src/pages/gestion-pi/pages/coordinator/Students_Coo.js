@@ -74,7 +74,7 @@ const Students_Coo = () => {
     import: false,
   });
   const [formData, setFormData] = useState({
-    EtudiantName: "",
+    label: "",
     EtudiantClass: "",
     Equipe: 0
   });
@@ -171,7 +171,7 @@ const Students_Coo = () => {
   // function to reset the form
   const resetForm = () => {
     setFormData({
-        EtudiantName: "",
+        label: "",
         EtudiantClass: "",
     });
   };
@@ -191,7 +191,7 @@ const Students_Coo = () => {
       if (item.EtudiantId === id) {
         setFormData({
           EtudiantId: item.EtudiantId,
-          EtudiantName: item.EtudiantName,
+          label: item.label,
           EtudiantClass: item.EtudiantClass,
           Equipe: item.Equipe
           // isCoordinator: item.isCoordinator
@@ -371,7 +371,7 @@ const Students_Coo = () => {
                             </td>
                             <td className="tb-tnx-info">
                               <div className="tb-tnx-desc">
-                                <span className="title">{etudiant.EtudiantName}</span>
+                                <span className="title">{etudiant.label}</span>
                               </div>
                               <div className="tb-tnx-date">
                                 <span className="date">{etudiant.EtudiantClass}</span>
@@ -474,9 +474,9 @@ const Students_Coo = () => {
                         className="form-control"
                         ref={register({ required: "This field is required" })}
                         type="text"
-                        name="EtudiantName"
-                        value={formData.EtudiantName}
-                        onChange={(e) => setFormData({ ...formData, EtudiantName: e.target.value })}
+                        name="label"
+                        value={formData.label}
+                        onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                         placeholder="Enter name"
                       />
                       {errors.bill && <span className="invalid">{errors.bill.message}</span>}
@@ -620,11 +620,11 @@ const Students_Coo = () => {
                       <input
                         className="form-control"
                         type="text"
-                        name="EtudiantName"
-                        defaultValue={formData.EtudiantName}
+                        name="label"
+                        defaultValue={formData.label}
                         placeholder="Enter name"
                         ref={register({ required: "This field is required" })}
-                        onChange={e => setFormData({ ...formData, EtudiantName: e.target.value })}
+                        onChange={e => setFormData({ ...formData, label: e.target.value })}
                       />
                       {errors.name && <span className="invalid">{errors.name.message}</span>}
                     </FormGroup>

@@ -66,8 +66,10 @@ import ClasseTuteur from "../pages/gestion-pi/pages/tuteur/ClasseTuteur";
 import projects from "../pages/gestion-pi/pages/tuteur/projects";
 import ClassCard from "../pages/gestion-pi/pages/coordinator/ClassCard"
 import ProjectCardPage from "../pages/pre-built/projects/ProjectCard";
+import Grille from "../pages/gestion-pi/pages/tuteur/Grille";
 import ProjectListPage from "../pages/pre-built/projects/ProjectList";
-import GilleProject from "../pages/gestion-pi/pages/coordinator/GrilleProject"
+import GilleProject from "../pages/gestion-pi/pages/coordinator/Grilles_Coo"
+import Options_Coo from "../pages/gestion-pi/pages/coordinator/Options_Coo"
 import CritereGrille from "../pages/gestion-pi/pages/coordinator/CritereGrille"
 import Users from "../pages/gestion-pi/pages/coordinator/Users";
 import Equipe from "../pages/gestion-pi/pages/tuteur/Equipe";
@@ -109,6 +111,7 @@ import TinymcePreview from "../pages/components/forms/rich-editor/TinymcePreview
 import KnobPreview from "../pages/components/charts/KnobPreview";
 import { FileManagerContextProvider } from "../pages/app/file-manager/FileManagerContext";
 import Students_Coo from "../pages/gestion-pi/pages/coordinator/Students_Coo";
+import AllGrilles from "../pages/gestion-pi/pages/tuteur/AllGrilles";
 
 const Pages = () => {
   useLayoutEffect(() => {
@@ -137,7 +140,10 @@ const Pages = () => {
             </UserContextProvider>
           )}
         ></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/grille/:id`} component={Grille}></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/AllGrilles/:id`} component={AllGrilles}></Route>
         <Route exact path={`${process.env.PUBLIC_URL}/projects-cordinateur`} component={Project_Coo}></Route>
+        <Route exact path={`${process.env.PUBLIC_URL}/options`} component={Options_Coo}></Route>
         <Route //Context Api added
           exact
           path={`${process.env.PUBLIC_URL}/user-list-compact`}

@@ -30,14 +30,17 @@ import {
   Form,
 } from "reactstrap";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 const ProjectsCord = () => {
   const [sm, updateSm] = useState(false);
   const [modal, setModal] = useState({
     add: false,
     edit: false,
+    addGrille: false,
   });
   const [projectss, SetProjectss] = useState([]);
+  const [editId, setEditedId] = useState();
   const [themes, SetThemes] = useState([]);
   const [advancedFilter, SetAdvancedFilter] = useState("Any Class");
   const [formData, setFormData] = useState({
@@ -141,7 +144,6 @@ const ProjectsCord = () => {
   };
 
   const getNameTheme = (id) => {
-
     const theme = themes.filter((p)=>p.ThemeId === id)[0];
     if(theme){return theme.label}  else return null ;
   };
@@ -245,12 +247,18 @@ const ProjectsCord = () => {
                       </div>
                       <div className="project-details">
                       </div>
-
                       <div className="project-meta">
                         <ul className="project-users g-1">
                           {projet.ProjectDescription}
                         </ul>
                       </div>
+                      <div className="team-view">
+                       <Link to={`${process.env.PUBLIC_URL}/grilleproject/${projet.ProjectOption}`} >
+                         <Button outline color="light" className="btn-round w-50px">
+                           <span>View Grilles</span>
+                         </Button>
+                       </Link>
+                     </div>
                     </ProjectCard>
                   </Col>
                 );

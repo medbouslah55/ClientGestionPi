@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
- 
 import api from "../../../../api/index";
 import Head from "../../../../layout/head/Head";
 import Content from "../../../../layout/content/Content";
@@ -20,7 +19,6 @@ import {
  RSelect,
 } from "../../../../components/Component";
 import { Option } from "../../Options";
-import { projectData } from "../../../pre-built/projects/ProjectData";
 import { findUpper } from "../../../../utils/Utils";
 import {
  DropdownMenu,
@@ -34,13 +32,14 @@ import {
 } from "reactstrap";
 import { useForm } from "react-hook-form";
  
-const GilleProject = () => {
+const Grilles_Coo = () => {
+
  const { id } = useParams();
- 
  const [sm, updateSm] = useState(false);
  const [modal, setModal] = useState({
    add: false,
    edit: false,
+   addDetail:false
  });
  const [editId, setEditedId] = useState();
  const [grilles, SetGrilles] = useState([]);
@@ -48,6 +47,11 @@ const GilleProject = () => {
    CritereName: "",
    Grille: 0,
  });
+ const [formDetailData, setFormDetailData] = useState({
+  DetailIntervalle: "",
+  DetailDescription: "",
+  Critere: 0,
+});
  
  // OnChange function to get the input data
  const onInputChange = (e) => {
@@ -64,7 +68,6 @@ const GilleProject = () => {
  
  const retrieveGrilles = async () => {
    const response = await api.get(`/grille/${id}`);
-   // console.log(response.data);
    return response.data;
  };
  
@@ -77,10 +80,21 @@ const GilleProject = () => {
    };
    getAllGrilles();
  },[]);
- 
+
+ const onAddClickHisDetails = ()=> {
+  // setFormDetailData({ ...formDetailData, Critere: item.CritereId });
+  setModal({ addDetail: true }, { add: false }, { edit: false });
+}
+
+ const onFormAddDetailSubmit = async () => {
+  await api.post("/detail", formDetailData);
+  // setModal({ aadDetail: true });
+};
+
  //Add Critere
  const onFormAddSubmit = async () => {
    await api.post("/critere", formData);
+   onAddClickHisDetails();
  };
  
  // Delete project
@@ -117,11 +131,11 @@ const GilleProject = () => {
      }
    });
  };
+
  const onAddClickCritere = (id) => {
    grilles.forEach((item) => {
      if (item.GrilleId === id) {
        setFormData({ ...formData, Grille: item.GrilleId });
-       // console.log(item);
        setModal({ add: true }, { edit: false });
        setEditedId(id);
      }
@@ -220,9 +234,11 @@ const GilleProject = () => {
                      <div className="team-view">
                        <Link to={`${process.env.PUBLIC_URL}/criteregrille/${grille.GrilleId}`}>
                          <Button outline color="light" className="btn-round w-50px">
-                           <span>View Critere</span>
+                           <span>View This Grille</span>
                          </Button>
                        </Link>
+                       &nbsp;
+                       &nbsp;
                        &nbsp;
                        <Button
                          outline
@@ -230,7 +246,7 @@ const GilleProject = () => {
                          className="btn-round w-50px"
                          onClick={() => onAddClickCritere(grille.GrilleId)}
                        >
-                         <span>Add Critere</span>
+                         <span>Add Content Grille</span>
                        </Button>
                      </div>
                    </ProjectCard>
@@ -256,14 +272,14 @@ const GilleProject = () => {
              <h5 className="title">Add Critere</h5>
              <div className="mt-4">
                <Form className="row gy-4" onSubmit={onFormAddSubmit}>
-                 <Col md="6">
+                 <Col md="12">
                    <FormGroup>
-                     <label className="form-label">Critere Name</label>
-                     <input
+                     <label className="form-label">Critere Description</label>
+                     <textarea
                        type="text"
                        name="CritereName"
                        defaultValue={formData.CritereName}
-                       placeholder="Enter Critere Name"
+                       placeholder="Enter Critere Description"
                        onChange={(e) => onInputChange(e)}
                        className="form-control"
                        ref={register({ required: "This field is required" })}
@@ -276,7 +292,7 @@ const GilleProject = () => {
                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                      <li>
                        <Button color="primary" size="md" type="submit">
-                         Add
+                         Add His Details
                        </Button>
                      </li>
                      <li>
@@ -382,8 +398,80 @@ const GilleProject = () => {
            </div>
          </ModalBody>
        </Modal>
+       <Modal isOpen={modal.addDetail} toggle={() => setModal({ aadDetail: false })} className="modal-dialog-centered" size="lg">
+         <ModalBody>
+           <a
+             href="#cancel"
+             onClick={(ev) => {
+               ev.preventDefault();
+               onFormCancel();
+             }}
+             className="close"
+           >
+             <Icon name="cross-sm"></Icon>
+           </a>
+           <div className="p-2">
+             <h5 className="title">Add Detail</h5>
+             <div className="mt-4">
+               <Form className="row gy-4" onSubmit={onFormAddDetailSubmit}>
+                 <Col md="6">
+                   <FormGroup>
+                     <label className="form-label">Detail Intervalle</label>
+                     <input
+                       type="text"
+                       name="DetailIntervalle"
+                       defaultValue={formDetailData.DetailIntervalle}
+                       placeholder="Enter Interval Name"
+                       onChange={(e) => onInputChange(e)}
+                       className="form-control"
+                       ref={register({ required: "This field is required" })}
+                     />
+                     {errors.title && <span className="invalid">{errors.title.message}</span>}
+                   </FormGroup>
+                 </Col>
+                 <Col md="6">
+                   <FormGroup>
+                     <label className="form-label">Detail Description</label>
+                     <input
+                       type="text"
+                       name="DetailDescription"
+                       defaultValue={formDetailData.DetailDescription}
+                       placeholder="Enter Description Name"
+                       onChange={(e) => onInputChange(e)}
+                       className="form-control"
+                       ref={register({ required: "This field is required" })}
+                     />
+                     {errors.title && <span className="invalid">{errors.title.message}</span>}
+                   </FormGroup>
+                 </Col>
+ 
+                 <Col size="12">
+                   <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                     <li>
+                       <Button color="primary" size="md" type="submit">
+                         Add
+                       </Button>
+                     </li>
+                     <li>
+                       <Button
+                         onClick={(ev) => {
+                           ev.preventDefault();
+                           onFormCancel();
+                         }}
+                         className="link link-light"
+                       >
+                         Cancel
+                       </Button>
+                     </li>
+                   </ul>
+                 </Col>
+               </Form>
+             </div>
+           </div>
+         </ModalBody>
+       </Modal>
      </Content>
    </React.Fragment>
  );
 };
-export default GilleProject;
+export default Grilles_Coo;

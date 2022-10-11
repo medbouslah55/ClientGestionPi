@@ -51,11 +51,6 @@ const projects = () => {
     ProjectDescription: "",
     Theme : 0,
   });
-  const [formDataGrille, setFormDataGrille] = useState({
-    GrilleName: "",
-    GrilleOption: "",
-    Project: 0,
-  });
 
   // OnChange function to get the input data
   const onInputChange = (e) => {
@@ -121,25 +116,6 @@ const projects = () => {
   //Add project
   const onFormAddSubmit = async () => {
     await api.post("/project", formData);
-  };
-
-  //Add Grille
-  const onFormAddSubmitGrille = async () => {
-    await api.post("/grille", formDataGrille);
-    // console.log(formDataGrille);
-    setModal({ AddGrille: false });
-    resetForm();
-  };
-
-  const onAddClickGrille = (id) => {
-    projectss.forEach((item) => {
-      if (item.ProjectId === id) {
-        setFormDataGrille({ ...formDataGrille, Project: item.ProjectId });
-        // console.log(item);
-        setModal({ addGrille: true }, { add: false }, { edit: true });
-        setEditedId(id);
-      }
-    });
   };
 
   // Delete project
@@ -222,7 +198,6 @@ const projects = () => {
           <Row className="g-gs">
             {projectss &&
               projectss.map((projet) => {
-                // var days = setDeadlineDays(projet.deadline);
                 return (
                   <Col sm="6" lg="4" xxl="3" key={projet.ProjectId}>
                     <ProjectCard>
@@ -289,25 +264,13 @@ const projects = () => {
                           {projet.ProjectDescription}
                         </ul>
                       </div>
-                      <br />
+                      <br/>
                      <div className="team-view">
-                       <Link to={`${process.env.PUBLIC_URL}/grilleproject/${projet.ProjectId}`} >
-                         {/* <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}> */}
- 
+                     <Link to={`${process.env.PUBLIC_URL}/AllGrilles/${projet.ProjectOption}`} >
                          <Button outline color="light" className="btn-round w-50px">
                            <span>View Grilles</span>
                          </Button>
                        </Link>
-                       &nbsp;
-                       {/* <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}> */}
-                       <Button
-                         outline
-                         color="light"
-                         className="btn-round w-50px"
-                         onClick={() => onAddClickGrille(projet.ProjectId)}
-                       >
-                         <span>Add Grille</span>
-                       </Button>
                      </div>
                     </ProjectCard>
                   </Col>
@@ -350,16 +313,13 @@ const projects = () => {
                   <Col md="6">
                     <FormGroup>
                       <label className="form-label">Project Option</label>
-                      
                       <RSelect options={Option} onChange={(e) =>
                          {setFormData({ ...formData, ProjectOption : e.value })
                          SetAdvancedFilter(e.value)}
                         }
                          />
-                    
                     </FormGroup>
                   </Col>
-                  
                   <Col md="12">
                   <label className="form-label">Theme</label>
                     <FormGroup>
@@ -502,82 +462,6 @@ const projects = () => {
             </div>
           </ModalBody>
         </Modal>
-        <Modal
-         isOpen={modal.addGrille}
-         toggle={() => setModal({ addGrille: false })}
-         className="modal-dialog-centered"
-         size="lg"
-       >
-         <ModalBody>
-           <a
-             href="#cancel"
-             onClick={(ev) => {
-               ev.preventDefault();
-               onFormCancel();
-             }}
-             className="close"
-           >
-             <Icon name="cross-sm"></Icon>
-           </a>
-           <div className="p-2">
-             <h5 className="title">Add Grille</h5>
-             <div className="mt-4">
-               <Form className="row gy-4" onSubmit={onFormAddSubmitGrille}>
-                 <Col md="6">
-                   <FormGroup>
-                     <label className="form-label">Grille Name</label>
-                     <input
-                       type="text"
-                       name="GrilleName"
-                       // defaultValue={formDataGrille.GrilleName}
-                       placeholder="Enter Title"
-                       onChange={(e) => setFormDataGrille({ ...formDataGrille, GrilleName: e.target.value })}
-                       ref={register({ required: "This field is required" })}
-                       className="form-control"
-                     />
-                     {errors.title && <span className="invalid">{errors.title.message}</span>}
-                   </FormGroup>
-                 </Col>
-                 <Col md="6">
-                   <FormGroup>
-                     <label className="form-label">Grille Option</label>
-                     <RSelect
-                       options={Option}
-                       onChange={(e) => {
-                         setFormDataGrille({ ...formDataGrille, GrilleOption: e.value });
-                         SetAdvancedFilter(e.value);
-                       }}
-                       defaultValue={{
-                         label: formData.ProjectOption,
-                       }}
-                     />
-                   </FormGroup>
-                 </Col>
-                 <Col size="12">
-                   <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                     <li>
-                       <Button color="primary" size="md" type="submit">
-                         Add Grille
-                       </Button>
-                     </li>
-                     <li>
-                       <Button
-                         onClick={(ev) => {
-                           ev.preventDefault();
-                           onFormCancel();
-                         }}
-                         className="link link-light"
-                       >
-                         Cancel
-                       </Button>
-                     </li>
-                   </ul>
-                 </Col>
-               </Form>
-             </div>
-           </div>
-         </ModalBody>
-       </Modal>
       </Content>
     </React.Fragment>
   );

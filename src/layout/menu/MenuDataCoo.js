@@ -11,7 +11,7 @@ const menuCoo = [
     heading: "Coordinator",
   },
   {
-    icon: "file-docs",
+    icon: "users",
     text: "Students_Coo",
     link: "/Students_Coo",
   },
@@ -36,6 +36,11 @@ const menuCoo = [
     link: "/theme",
   },
   {
+    icon: "tile-thumb",
+    text: "Options_Coo",
+    link: "/options",
+  },
+  {
     heading: "Tuteur",
   },
   {
@@ -44,14 +49,14 @@ const menuCoo = [
     link: "/classe_tuteur",
   },
   {
-    icon: "tile-thumb",
+    icon: "file-docs",
     text: "Projects",
     link: "/project-tuteur",
   },
   {
     icon: "users",
     text: "Students",
-         link: "/Students",
+    link: "/Students",
   },
   {
     icon: "grid-alt",

@@ -16,7 +16,7 @@ const menu = [
     link: "/classe_tuteur",
   },
   {
-    icon: "tile-thumb",
+    icon: "file-docs",
     text: "Projects",
     link: "/project-tuteur",
   },

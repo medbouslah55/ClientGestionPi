@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
- 
 import api from "../../../../api/index";
 import Head from "../../../../layout/head/Head";
 import Content from "../../../../layout/content/Content";
@@ -33,23 +32,26 @@ import {
 } from "reactstrap";
 import { useForm } from "react-hook-form";
  
-const CritereGrille = () => {
+const AllGrilles = () => {
+
  const { id } = useParams();
- 
  const [sm, updateSm] = useState(false);
  const [modal, setModal] = useState({
    add: false,
    edit: false,
+   addDetail:false
  });
  const [editId, setEditedId] = useState();
- const [criters, setCriteres] = useState([]);
+ const [grilles, SetGrilles] = useState([]);
  const [formData, setFormData] = useState({
-   DetailIntervalle: "",
-   DetailDescription: "",
-   Critere: 0,
+   CritereName: "",
+   Grille: 0,
  });
- 
- console.log(formData);
+ const [formDetailData, setFormDetailData] = useState({
+  DetailIntervalle: "",
+  DetailDescription: "",
+  Critere: 0,
+});
  
  // OnChange function to get the input data
  const onInputChange = (e) => {
@@ -64,30 +66,40 @@ const CritereGrille = () => {
    });
  };
  
- const retrieveCriteres = async () => {
-   const response = await api.get(`/critere/${id}`);
-   // console.log(response.data);
+ const retrieveGrilles = async () => {
+   const response = await api.get(`/grille/${id}`);
    return response.data;
  };
  
  useEffect(() => {
-   const getAllCriteres = async () => {
-     const allCriters = await retrieveCriteres();
-     if (allCriters) {
-       setCriteres(allCriters);
+   const getAllGrilles = async () => {
+     const allGrilles = await retrieveGrilles();
+     if (allGrilles) {
+       SetGrilles(allGrilles);
      }
    };
-   getAllCriteres();
+   getAllGrilles();
  },[]);
- 
+
+ const onAddClickHisDetails = ()=> {
+  // setFormDetailData({ ...formDetailData, Critere: item.CritereId });
+  setModal({ addDetail: true }, { add: false }, { edit: false });
+}
+
+ const onFormAddDetailSubmit = async () => {
+  await api.post("/detail", formDetailData);
+  // setModal({ aadDetail: true });
+};
+
  //Add Critere
  const onFormAddSubmit = async () => {
-   await api.post("/detail", formData);
+   await api.post("/critere", formData);
+   onAddClickHisDetails();
  };
  
  // Delete project
  const onDeleteClick = async (id) => {
-   await api.delete(`/critere/${id}`);
+   await api.delete(`/grille/${id}`);
  };
  // function to close the modal
  const onFormCancel = () => {
@@ -104,7 +116,7 @@ const CritereGrille = () => {
  
  // function that loads the want to editted data
  const onEditClick = (id) => {
-   criters.forEach((item) => {
+   grilles.forEach((item) => {
      if (item.ProjectId === id) {
        setFormData({
          ProjectId: item.ProjectId,
@@ -119,11 +131,11 @@ const CritereGrille = () => {
      }
    });
  };
- const onAddClickDetail = (id) => {
-   criters.forEach((item) => {
-     if (item.CritereId === id) {
-       setFormData({ ...formData, Critere: item.CritereId });
-       // console.log(item);
+
+ const onAddClickCritere = (id) => {
+   grilles.forEach((item) => {
+     if (item.GrilleId === id) {
+       setFormData({ ...formData, Grille: item.GrilleId });
        setModal({ add: true }, { edit: false });
        setEditedId(id);
      }
@@ -139,8 +151,8 @@ const CritereGrille = () => {
        <BlockHead size="sm">
          <BlockBetween>
            <BlockHeadContent>
-             <BlockTitle page> Criteres</BlockTitle>
-             <BlockDes className="text-soft">You have total {criters.length} Criteres</BlockDes>
+             <BlockTitle page> Grilles</BlockTitle>
+             <BlockDes className="text-soft">You have total {grilles.length} Grilles</BlockDes>
            </BlockHeadContent>
            <BlockHeadContent>
              <div className="toggle-wrap nk-block-tools-toggle">
@@ -157,10 +169,10 @@ const CritereGrille = () => {
  
        <Block>
          <Row className="g-gs">
-           {criters &&
-             criters.map((criter) => {
+           {grilles &&
+             grilles.map((grille) => {
                return (
-                 <Col sm="6" lg="4" xxl="3" key={criter.CritereId}>
+                 <Col sm="6" lg="4" xxl="3" key={grille.GrilleId}>
                    <ProjectCard>
                      <div className="project-head">
                        <a
@@ -172,12 +184,12 @@ const CritereGrille = () => {
                        >
                          <UserAvatar
                            className="sq"
-                           theme={criter.GrilleOption}
-                           text={findUpper(criter.CritereName)}
+                           theme={grille.GrilleOption}
+                           text={findUpper(grille.GrilleOption)}
                          />
                          <div className="project-info">
-                           <h6 className="title">{criter.CritereName}</h6>
-                           <span className="sub-text">{criter.CritereName}</span>
+                           <h6 className="title">{grille.GrilleName}</h6>
+                           <span className="sub-text">{grille.GrilleOption}</span>
                          </div>
                        </a>
                        <UncontrolledDropdown>
@@ -189,7 +201,7 @@ const CritereGrille = () => {
                          </DropdownToggle>
                          <DropdownMenu right>
                            <ul className="link-list-opt no-bdr">
-                             <li onClick={() => onEditClick(criter.CritereId)}>
+                             <li onClick={() => onEditClick(grille.GrilleId)}>
                                <DropdownItem
                                  tag="a"
                                  href="#edit"
@@ -201,7 +213,7 @@ const CritereGrille = () => {
                                  <span>Edit Project</span>
                                </DropdownItem>
                              </li>
-                             <li onClick={() => onDeleteClick(criter.CritereId)}>
+                             <li onClick={() => onDeleteClick(grille.GrilleId)}>
                                <DropdownItem
                                  tag="a"
                                  href="#delete"
@@ -220,20 +232,11 @@ const CritereGrille = () => {
                      <div className="project-details"></div>
  
                      <div className="team-view">
-                       <Link to={`${process.env.PUBLIC_URL}/grilleproject/${criter.CritereId}`}>
+                       <Link to={`${process.env.PUBLIC_URL}/grille/${grille.GrilleId}`}>
                          <Button outline color="light" className="btn-round w-50px">
-                           <span>View Detail</span>
+                           <span>View This Grille</span>
                          </Button>
                        </Link>
-                       &nbsp;
-                       <Button
-                         outline
-                         color="light"
-                         className="btn-round w-50px"
-                         onClick={() => onAddClickDetail(criter.CritereId)}
-                       >
-                         <span>Add Detail</span>
-                       </Button>
                      </div>
                    </ProjectCard>
                  </Col>
@@ -255,32 +258,17 @@ const CritereGrille = () => {
              <Icon name="cross-sm"></Icon>
            </a>
            <div className="p-2">
-             <h5 className="title">Add Detail</h5>
+             <h5 className="title">Add Critere</h5>
              <div className="mt-4">
                <Form className="row gy-4" onSubmit={onFormAddSubmit}>
-                 <Col md="6">
+                 <Col md="12">
                    <FormGroup>
-                     <label className="form-label">Detail Intervalle</label>
-                     <input
+                     <label className="form-label">Critere Description</label>
+                     <textarea
                        type="text"
-                       name="DetailIntervalle"
-                       defaultValue={formData.DetailIntervalle}
-                       placeholder="Enter Interval Name"
-                       onChange={(e) => onInputChange(e)}
-                       className="form-control"
-                       ref={register({ required: "This field is required" })}
-                     />
-                     {errors.title && <span className="invalid">{errors.title.message}</span>}
-                   </FormGroup>
-                 </Col>
-                 <Col md="6">
-                   <FormGroup>
-                     <label className="form-label">Detail Description</label>
-                     <input
-                       type="text"
-                       name="DetailDescription"
-                       defaultValue={formData.DetailDescription}
-                       placeholder="Enter Description Name"
+                       name="CritereName"
+                       defaultValue={formData.CritereName}
+                       placeholder="Enter Critere Description"
                        onChange={(e) => onInputChange(e)}
                        className="form-control"
                        ref={register({ required: "This field is required" })}
@@ -293,7 +281,7 @@ const CritereGrille = () => {
                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                      <li>
                        <Button color="primary" size="md" type="submit">
-                         Add
+                         Add His Details
                        </Button>
                      </li>
                      <li>
@@ -399,10 +387,80 @@ const CritereGrille = () => {
            </div>
          </ModalBody>
        </Modal>
+       <Modal isOpen={modal.addDetail} toggle={() => setModal({ aadDetail: false })} className="modal-dialog-centered" size="lg">
+         <ModalBody>
+           <a
+             href="#cancel"
+             onClick={(ev) => {
+               ev.preventDefault();
+               onFormCancel();
+             }}
+             className="close"
+           >
+             <Icon name="cross-sm"></Icon>
+           </a>
+           <div className="p-2">
+             <h5 className="title">Add Detail</h5>
+             <div className="mt-4">
+               <Form className="row gy-4" onSubmit={onFormAddDetailSubmit}>
+                 <Col md="6">
+                   <FormGroup>
+                     <label className="form-label">Detail Intervalle</label>
+                     <input
+                       type="text"
+                       name="DetailIntervalle"
+                       defaultValue={formDetailData.DetailIntervalle}
+                       placeholder="Enter Interval Name"
+                       onChange={(e) => onInputChange(e)}
+                       className="form-control"
+                       ref={register({ required: "This field is required" })}
+                     />
+                     {errors.title && <span className="invalid">{errors.title.message}</span>}
+                   </FormGroup>
+                 </Col>
+                 <Col md="6">
+                   <FormGroup>
+                     <label className="form-label">Detail Description</label>
+                     <input
+                       type="text"
+                       name="DetailDescription"
+                       defaultValue={formDetailData.DetailDescription}
+                       placeholder="Enter Description Name"
+                       onChange={(e) => onInputChange(e)}
+                       className="form-control"
+                       ref={register({ required: "This field is required" })}
+                     />
+                     {errors.title && <span className="invalid">{errors.title.message}</span>}
+                   </FormGroup>
+                 </Col>
+ 
+                 <Col size="12">
+                   <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                     <li>
+                       <Button color="primary" size="md" type="submit">
+                         Add
+                       </Button>
+                     </li>
+                     <li>
+                       <Button
+                         onClick={(ev) => {
+                           ev.preventDefault();
+                           onFormCancel();
+                         }}
+                         className="link link-light"
+                       >
+                         Cancel
+                       </Button>
+                     </li>
+                   </ul>
+                 </Col>
+               </Form>
+             </div>
+           </div>
+         </ModalBody>
+       </Modal>
      </Content>
    </React.Fragment>
  );
 };
-export default CritereGrille;
- 
-
+export default AllGrilles;
